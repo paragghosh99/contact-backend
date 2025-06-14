@@ -21,16 +21,13 @@ app.post("/contact", async (req, res) => {
 
   console.log("📬 Received POST /contact", { name, email, message });
 
-  // Rediffmail SMTP settings
   const transporter = nodemailer.createTransport({
-    host: "smtp.rediffmailpro.com", // use smtp.rediffmail.com if pro doesn't work
-    port: 465, // or 587 if 465 fails
-    secure: true, // true for 465, false for 587
+    service: "gmail",
     auth: {
-      user: process.env.EMAIL,      // your Rediffmail email
-      pass: process.env.EMAIL_PASS, // your Rediffmail password
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASS,
     },
-  });
+});
 
   const mailOptions = {
     from: email,
