@@ -18,6 +18,8 @@ app.get("/", (req, res) => {
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
+  console.log("Received POST /contact", { name, email, message });
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
