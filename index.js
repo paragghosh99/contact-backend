@@ -1,52 +1,46 @@
 const express = require("express");
-const nodemailer = require("nodemailer");
 const cors = require("cors");
+const { Resend } = require("resend");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Basic test route to confirm the server is running
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Basic test route
 app.get("/", (req, res) => {
-  res.send("✅ Backend is running");
+  res.send("✅ Backend is running with Resend");
 });
 
 // Contact route
 app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
-
   console.log("📬 Received POST /contact", { name, email, message });
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASS,
-    },
-});
-
-  const mailOptions = {
-    from: email,
-    to: process.env.EMAIL, // Send it to yourself
-    subject: `New message from ${name}`,
-    text: message,
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully!");
-    res.status(200).json({ success: true, message: "Email sent!" });
+    await resend.emails.send({
+      from: "Portfolio <onboarding@resend.dev>", // or use your domain
+      to: "ghosh.parag2025@gmail.com",
+      subject: `New message from ${name}`,
+      html: `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p>${message}</p>
+      `,
+    });
+
+    console.log("✅ Email sent via Resend!");
+    res.status(200).json({ success: true, message: "Email sent successfully!" });
   } catch (error) {
-    console.error("❌ Email error:", error);
+    console.error("❌ Error sending email:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
